@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Node/Express + Datastar Example</title>
+    <link
+        rel="stylesheet"
+        media="(prefers-color-scheme:light)"
+        href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/light.css"
+    />
+    <link
+        rel="stylesheet"
+        media="(prefers-color-scheme:dark)"
+        href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/dark.css"
+        onload="document.documentElement.classList.add('sl-theme-dark');"
+    />
+    <script
+        type="module"
+        src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace.js"
+    ></script>
+    <script type="module" defer src="https://cdn.jsdelivr.net/npm/@sudodevnull/datastar"></script></head>
+    <body style="font-family: var(--sl-font-sans)">
+    <main style="max-width: 1024px; margin: auto; display: flex; flex-direction: column; gap: 1em" id="main" data-store='{ input: "", show: false }'>
+    <h2>Node/Express + Datastar Example</h2>
+    <sl-alert variant="warning" open>
+      <sl-icon slot="icon" name="exclamation-triangle"></sl-icon>
+      Under construction...
+    </sl-alert>
+    <div style="display: flex; gap: 1em">
+    <sl-input style="flex: 1" type="text" placeholder="Type here!" data-model="input"></sl-input>
+    <sl-button data-on-click="$$put('/put')">Send State</sl-button>
+    </div>
+    <div id="output"></div>
+    <sl-button data-on-click="$$get('/get')">Get Backend State</sl-button>
+    <div id="output2"></div>
+    <sl-button data-on-click="$show=!$show">Toggle</sl-button>
+    <div data-show="$show">
+      <span>Hello From Datastar!</span>
+    </div>
+    <div>
+      <span>Feed from server: </span>
+      <span id="feed" data-on-load="$$get('/feed')"></span>
+    </div>
+    </main>
+  </body>
+</html>
