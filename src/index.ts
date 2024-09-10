@@ -1,12 +1,8 @@
 import express, { Request, Response } from "express";
-import { randomBytes } from "crypto";
+import { Worker } from "worker_threads";
 import fs from "fs";
 import path from "path";
-import {
-  createDataStarEvent,
-  createSessionMiddleware,
-  setupDataStarRequest,
-} from "./utils";
+import { createDataStarEvent, setupDataStarRequest } from "./utils";
 import { DataStarMergeType } from "./types";
 
 const app = express();
@@ -58,21 +54,39 @@ app.get("/get", setupDataStarRequest, (req: Request, res: Response) => {
   res.end();
 });
 
-app.get("/feed", setupDataStarRequest, (req: Request, res: Response) => {
-  const intervalId = setInterval(() => {
-    if (!res.writable) {
-      clearInterval(intervalId);
-      return;
-    }
+app.get("/feed", setupDataStarRequest, async (req: Request, res: Response) => {
+  const worker = new Worker(path.join(__dirname, "feedWorker.js"));
 
-    const rand = randomBytes(8).toString("hex");
-    const frag = `<span id="feed">${rand}</span>`;
-    const dataStarMessage = createDataStarEvent({
+  // When the worker sends data, write it to the response
+  worker.on("message", (message) => {
+    const frag = message;
+    const event = createDataStarEvent({
       frag,
+      mergeType: DataStarMergeType.APPEND_ELEMENT,
       selector: "#feed",
     });
-    res.write(dataStarMessage);
-  }, 1000);
+    if (res.writable) {
+      res.write(event);
+    } else {
+      worker.postMessage("stop");
+    }
+  });
+
+  // Handle worker errors
+  worker.on("error", (error) => {
+    console.error("Worker error:", error);
+    res.end();
+  });
+
+  // When the client closes the connection, stop the worker
+  req.on("close", () => {
+    worker.postMessage("stop");
+    worker.terminate();
+    res.end();
+  });
+
+  // Start the worker
+  worker.postMessage("start");
 });
 
 const PORT = process.env.PORT || 3000;

@@ -1,6 +1,4 @@
-import { createSession } from "better-sse";
 import { NextFunction, Request, Response } from "express";
-import { IncomingMessage, ServerResponse } from "http";
 import { IDataStarCreation } from "./types";
 
 export function createDataStarEvent({
@@ -13,16 +11,6 @@ export function createDataStarEvent({
   if (mergeType) responseString += `data: merge ${mergeType}\n`;
   responseString += `data: fragment ${frag}\n\n`;
   return responseString;
-}
-
-export async function createSessionMiddleware(
-  req: Request,
-  res: ServerResponse<IncomingMessage> & { sse?: any },
-  next: NextFunction
-) {
-  const session = await createSession(req, res);
-  res.sse = session;
-  next();
 }
 
 export function setupDataStarRequest(
